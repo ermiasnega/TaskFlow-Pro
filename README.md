@@ -114,3 +114,12 @@ TaskFlow now calculates analytics from authenticated MongoDB activity rather tha
 Focus sessions are stored in the MongoDB `FocusSession` model with user ownership, duration, completion state, start time, and completion time. The Focus Timer provides 25-minute focus sessions, 5-minute short breaks, 15-minute long breaks, start/pause/resume/reset/skip controls, completed-session counts, today’s focus time, and total focus time. A long break is recommended after every four completed focus sessions. Completed sessions are persisted through `GET /api/focus/sessions` and `POST /api/focus/sessions` and are included in the Analytics aggregations.
 
 Iteration 5 verification uses the strict Backend, Mobile, and Admin TypeScript checks plus `./Backend/node_modules/.bin/tsx Backend/tests/analytics.smoke.ts`. The smoke test creates real authenticated MongoDB activity, verifies every analytics endpoint and focus-session persistence, and removes its temporary task afterward.
+
+
+## Iteration 6: Profile, Settings, and Mobile Polish
+
+TaskFlow now includes authenticated profile management through `GET /api/users/profile` and `PUT /api/users/profile`, including avatar URL, display name, notification preferences, appearance, focus mode, default view, language, and backup/sync preferences. Password changes use `PUT /api/users/password`, require the current password, validate the new password confirmation, and hash the replacement with bcrypt.
+
+The Mobile Profile screen displays the real user identity, avatar or initials, MongoDB-backed task counts, completed-task productivity, and total focus minutes. It provides edit-profile, avatar, change-password, settings, and logout actions. The Settings screen persists task reminders, daily summary, focus notifications, productivity notifications, focus mode, default view, and backup/sync controls, with privacy and About TaskFlow information states.
+
+Iteration 6 polish includes safe-area-aware layouts, keyboard avoidance for profile and task forms, scrollable small-screen content, loading and retry states, API error feedback, disabled saving controls, Android-compatible switch and keyboard behavior, and the reference-matched dark bottom navigation. Verification uses strict Backend, Mobile, and Admin checks, the three-folder structure validation, and `./Backend/node_modules/.bin/tsx Backend/tests/profile.smoke.ts`.

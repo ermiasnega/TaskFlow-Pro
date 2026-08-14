@@ -9,6 +9,7 @@ import { reminderRouter } from "./routes/reminder.routes.js";
 import { searchRouter } from "./routes/search.routes.js";
 import { analyticsRouter } from "./routes/analytics.routes.js";
 import { focusRouter } from "./routes/focus.routes.js";
+import { userRouter } from "./routes/user.routes.js";
 
 export const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -25,6 +26,7 @@ app.use("/api/reminders", reminderRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/focus", focusRouter);
+app.use("/api/users", userRouter);
 
 export async function connectDatabase() {
   if (!mongoUri) throw new Error("MONGODB_URI is not configured");
