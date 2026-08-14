@@ -1,7 +1,7 @@
 import { createTRPCReact } from "@trpc/react-query";
 import { httpBatchLink } from "@trpc/client";
+import type { AnyRouter } from "@trpc/server";
 import superjson from "superjson";
-import type { AppRouter } from "@/server/routers";
 import { getApiBaseUrl } from "@/constants/oauth";
 import * as Auth from "@/lib/_core/auth";
 
@@ -12,14 +12,15 @@ import * as Auth from "@/lib/_core/auth";
  * NOT at the root createClient level. This ensures client and server
  * use the same serialization format (superjson).
  */
-export const trpc = createTRPCReact<AppRouter>();
+export const trpc = createTRPCReact<AnyRouter>();
+const trpcAny = trpc as any;
 
 /**
  * Creates the tRPC client with proper configuration.
  * Call this once in your app's root layout.
  */
 export function createTRPCClient() {
-  return trpc.createClient({
+  return trpcAny.createClient({
     links: [
       httpBatchLink({
         url: `${getApiBaseUrl()}/api/trpc`,

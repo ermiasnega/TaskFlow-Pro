@@ -16,3 +16,6 @@
 - [ ] Create private GitHub repository `TaskFlow-Pro` and push the current TaskFlow foundation
 
 - [ ] Locate the user-created `TaskFlow-Pro` remote and push the current TaskFlow foundation
+
+- [x] Restructure repository root to only `Admin/`, `Backend/`, and `Mobile/` application folders
+- [ ] Update workspace scripts, Expo paths, documentation, and GitHub structure for the three-folder layout

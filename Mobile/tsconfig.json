@@ -11,7 +11,10 @@
         "./*"
       ],
       "@shared/*": [
-        "./shared/*"
+        "../Backend/shared/*"
+      ],
+      "@/server/*": [
+        "../Backend/server/*"
       ]
     }
   },
