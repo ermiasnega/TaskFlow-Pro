@@ -11,6 +11,7 @@ import { analyticsRouter } from "./routes/analytics.routes.js";
 import { focusRouter } from "./routes/focus.routes.js";
 import { userRouter } from "./routes/user.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
+import { advancedAdminRouter } from "./routes/advanced-admin.routes.js";
 
 export const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -29,6 +30,7 @@ app.use("/api/analytics", analyticsRouter);
 app.use("/api/focus", focusRouter);
 app.use("/api/users", userRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/admin", advancedAdminRouter);
 
 export async function connectDatabase() {
   if (!mongoUri) throw new Error("MONGODB_URI is not configured");

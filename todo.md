@@ -71,3 +71,10 @@
 - [x] Iteration 7: Build separate professional desktop Admin dashboard shell, login, protected routes, navigation, and live charts
 - [x] Iteration 7: Build live Users, Tasks, Categories, Analytics, Notifications, and Settings admin flows with filtering, pagination, CRUD, and safeguards
 - [x] Iteration 7: Verify Admin/Backend behavior, preserve Admin/Backend/Mobile structure, document, and synchronize to GitHub
+
+- [x] Iteration 8: Add live advanced Admin analytics APIs for active users, task trends, completion rate, focus time, categories, active users, and productivity trends with date filters
+- [x] Iteration 8: Build the Admin advanced analytics page with filter controls, interactive charts/tooltips, loading states, and empty states
+- [x] Iteration 8: Add Admin notification management APIs and UI for viewing, creating, sending, deleting, and delivery status
+- [x] Iteration 8: Add Admin system settings APIs and UI for application, default task, category, notification, and permission settings
+- [x] Iteration 8: Verify every Admin endpoint requires JWT and role=admin, with explicit normal-user denial tests
+- [x] Iteration 8: Run final checks, preserve Admin/Backend/Mobile structure, synchronize to GitHub, and save a checkpoint
