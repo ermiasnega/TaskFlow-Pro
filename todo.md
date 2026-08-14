@@ -42,3 +42,5 @@
 - [x] Iteration 3: Implement live Tasks list with filters, search, sorting, favorite and completion controls
 - [x] Iteration 3: Implement task details and real add/edit/delete/complete/favorite flows
 - [x] Iteration 3: Test task CRUD and update documentation while preserving Admin/Backend/Mobile structure
+
+- [ ] Synchronize the Iteration 3 MongoDB task-management changes to the existing GitHub repository
