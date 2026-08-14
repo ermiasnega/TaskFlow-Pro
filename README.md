@@ -43,3 +43,11 @@ TaskFlow-Pro/
 ├── .gitignore
 └── package.json
 ```
+
+## Iteration 2 Authentication
+
+The Mobile workspace now includes the branded splash/loading state, welcome onboarding, login, registration, forgot-password, reset-password, automatic session restoration, protected tab navigation, and logout. Sessions use SecureStore on native platforms and localStorage on web. All authentication requests use Axios against the real Backend API.
+
+The Backend workspace exposes `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, and protected `GET /api/auth/me`. User passwords are hashed with bcrypt, access tokens use JWT, and user records are stored with Mongoose in MongoDB. In development, forgot-password returns a reset token so the flow can be verified without an email provider; production email delivery remains a later integration.
+
+Configure `MONGODB_URI`, the built-in `JWT_SECRET`, and `EXPO_PUBLIC_API_URL` through the project’s secure environment settings. Do not commit Atlas credentials or `.env` files. Run the Backend directly with `./Backend/node_modules/.bin/tsx Backend/src/server.ts`, run Mobile checks with `./node_modules/.bin/tsc --noEmit -p Mobile/tsconfig.json`, and run the end-to-end auth verification with `./Backend/node_modules/.bin/tsx Backend/tests/auth.smoke.ts`.

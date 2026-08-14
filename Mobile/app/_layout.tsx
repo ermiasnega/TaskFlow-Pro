@@ -1,6 +1,6 @@
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -18,6 +18,8 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
+import { TaskFlowAuthProvider, useTaskFlowAuth } from "@/lib/taskflow-auth-context";
+import { TaskFlowSplash } from "@/components/taskflow-splash";
 
 const TrpcProvider = (trpc as any).Provider;
 
@@ -27,6 +29,21 @@ const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 export const unstable_settings = {
   anchor: "(tabs)",
 };
+
+function NavigationGate({ children }: { children: React.ReactNode }) {
+  const { loading, isAuthenticated } = useTaskFlowAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    const inAuthGroup = segments[0] === "(auth)";
+    if (!isAuthenticated && !inAuthGroup) router.replace("/(auth)");
+    if (isAuthenticated && inAuthGroup) router.replace("/(tabs)");
+  }, [loading, isAuthenticated, router, segments]);
+
+  return loading ? <TaskFlowSplash /> : children;
+}
 
 export default function RootLayout() {
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
@@ -97,25 +114,30 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 
+  const gatedContent = <NavigationGate>{content}</NavigationGate>;
   const shouldOverrideSafeArea = Platform.OS === "web";
 
   if (shouldOverrideSafeArea) {
     return (
-      <ThemeProvider>
+      <TaskFlowAuthProvider>
+        <ThemeProvider>
         <SafeAreaProvider initialMetrics={providerInitialMetrics}>
           <SafeAreaFrameContext.Provider value={frame}>
             <SafeAreaInsetsContext.Provider value={insets}>
-              {content}
+              {gatedContent}
             </SafeAreaInsetsContext.Provider>
           </SafeAreaFrameContext.Provider>
         </SafeAreaProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </TaskFlowAuthProvider>
     );
   }
 
   return (
-    <ThemeProvider>
-      <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
-    </ThemeProvider>
+    <TaskFlowAuthProvider>
+      <ThemeProvider>
+      <SafeAreaProvider initialMetrics={providerInitialMetrics}>{gatedContent}</SafeAreaProvider>
+      </ThemeProvider>
+    </TaskFlowAuthProvider>
   );
 }
