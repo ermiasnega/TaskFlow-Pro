@@ -33,3 +33,5 @@
 - [x] Test real-email OTP flow, invalid/expired/reused codes, and document setup
 
 - [x] Add a Resend OTP button with a 60-second countdown to the Mobile OTP verification screen
+
+- [ ] Synchronize the latest TaskFlow source and OTP resend changes to the existing GitHub repository
