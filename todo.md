@@ -44,3 +44,7 @@
 - [x] Iteration 3: Test task CRUD and update documentation while preserving Admin/Backend/Mobile structure
 
 - [x] Synchronize the Iteration 3 MongoDB task-management changes to the existing GitHub repository
+
+- [x] Consolidate the repository so only Admin, Backend, and Mobile are top-level application folders
+- [x] Remove duplicate lowercase/template application folders and update root scripts and documentation
+- [x] Verify and synchronize the cleaned three-folder repository to GitHub
