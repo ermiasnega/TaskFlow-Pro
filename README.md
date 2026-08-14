@@ -10,7 +10,7 @@ TaskFlow is a production-oriented task management foundation built from the supp
 | `Backend/` | Express + TypeScript API foundation, server internals, Mongoose model, JWT guard, bcrypt helper, and starter routes. |
 | `Admin/` | React + Vite dashboard foundation with TaskFlow styling and Recharts dependency. |
 
-The repository root contains only project metadata and the three application workspaces. Hidden tooling directories created by the local development environment are not application folders.
+The repository root contains only project metadata and the three application workspaces. The only top-level application folders are `Admin/`, `Backend/`, and `Mobile/`; lowercase duplicates and template application folders have been removed. Hidden tooling directories created by the local development environment are not application folders.
 
 ## Run Commands
 
@@ -24,11 +24,11 @@ The shared `TaskFlowTheme` centralizes the midnight background, navy and raised 
 
 ## Configuration Still Required
 
-The backend accepts `MONGODB_URI` and `JWT_SECRET` through `Backend/.env`; no database is connected unless `MONGODB_URI` is supplied. The starter API currently exposes health/config endpoints and reserves authenticated task routes for Iteration 2. The Expo app configuration and generated TaskFlow icon assets live under `Mobile/`. The admin dashboard currently uses local presentation data until API wiring is introduced.
+The Backend accepts `MONGODB_URI`, `JWT_SECRET`, and SMTP configuration through its environment; no database is connected unless `MONGODB_URI` is supplied. The Expo app configuration, assets, routes, and reusable TaskFlow components live under `Mobile/`. The Admin dashboard lives under `Admin/`, and the current task APIs and task-management screens are documented below.
 
 ## Verification Scope
 
-The foundation is intended to be typechecked independently for the `Mobile/`, `Backend/`, and `Admin/` workspaces. This iteration intentionally does not implement complete authentication, database CRUD, cloud synchronization, or full application workflows.
+The three workspaces are typechecked independently: `Mobile/`, `Backend/`, and `Admin/`. Authentication, production email OTP recovery, MongoDB-backed task CRUD, live dashboard statistics, task filtering, task details, and add/edit/delete/complete flows are implemented.
 
 ## GitHub
 
@@ -46,9 +46,9 @@ TaskFlow-Pro/
 
 ## Iteration 2 Authentication
 
-The Mobile workspace now includes the branded splash/loading state, welcome onboarding, login, registration, forgot-password, reset-password, automatic session restoration, protected tab navigation, and logout. Sessions use SecureStore on native platforms and localStorage on web. All authentication requests use Axios against the real Backend API.
+The Mobile workspace includes the branded splash/loading state, welcome onboarding, login, registration, forgot-password, reset-password with real email OTP, automatic session restoration, protected tab navigation, and logout. Sessions use SecureStore on native platforms and localStorage on web. All authentication requests use Axios against the real Backend API.
 
-The Backend workspace exposes `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, and protected `GET /api/auth/me`. User passwords are hashed with bcrypt, access tokens use JWT, and user records are stored with Mongoose in MongoDB. In development, forgot-password returns a reset token so the flow can be verified without an email provider; production email delivery remains a later integration.
+The Backend workspace exposes `POST /api/auth/register`, `POST /api/auth/login`, production email OTP reset endpoints, and protected `GET /api/auth/me`. User passwords are hashed with bcrypt, access tokens use JWT, and user records are stored with Mongoose in MongoDB.
 
 Configure `MONGODB_URI`, the built-in `JWT_SECRET`, and `EXPO_PUBLIC_API_URL` through the project’s secure environment settings. Do not commit Atlas credentials or `.env` files. Run the Backend directly with `./Backend/node_modules/.bin/tsx Backend/src/server.ts`, run Mobile checks with `./node_modules/.bin/tsc --noEmit -p Mobile/tsconfig.json`, and run the end-to-end auth verification with `./Backend/node_modules/.bin/tsx Backend/tests/auth.smoke.ts`.
 
