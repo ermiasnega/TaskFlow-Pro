@@ -32,7 +32,7 @@ const env = {
   appSlug: "taskflow",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "/manus-storage/taskflow-icon_4e4ee1d1.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
