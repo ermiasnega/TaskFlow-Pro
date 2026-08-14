@@ -61,3 +61,8 @@
 - [x] Iteration 5: Replace Analytics placeholder with live period and custom-range metrics and charts
 - [x] Iteration 5: Add Pomodoro Focus Timer with persisted completed sessions and focus statistics
 - [x] Iteration 5: Verify analytics/focus APIs, Mobile checks, structure, documentation, and GitHub synchronization
+
+- [x] Iteration 6: Add authenticated profile read/update, avatar, password-change, and notification-preference persistence APIs
+- [x] Iteration 6: Build editable Profile and complete Settings screens with real saved preferences
+- [x] Iteration 6: Audit Mobile navigation, forms, keyboard handling, loading/error/empty states, safe areas, overflow, and Android compatibility
+- [x] Iteration 6: Verify profile/settings flows, documentation, three-folder structure, and GitHub synchronization

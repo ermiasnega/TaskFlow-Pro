@@ -1,0 +1,22 @@
+import { Router } from "express";
+import bcrypt from "bcrypt";
+import { Types } from "mongoose";
+import { requireAuth, type AuthRequest } from "../middleware/auth.js";
+import { User } from "../models/user.js";
+import { Task } from "../models/task.js";
+import { FocusSession } from "../models/focus-session.js";
+import { passwordChangeSchema, profileUpdateSchema } from "../validation/user.schemas.js";
+
+export const userRouter = Router();
+userRouter.use(requireAuth);
+
+function owner(req: AuthRequest) { if (!req.userId) throw new Error("Authenticated user is missing"); return new Types.ObjectId(req.userId); }
+function publicProfile(user: any, stats: { tasks: { total: number; completed: number; inProgress: number; pending: number }; totalFocusMinutes: number }) { return { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar ?? "", role: user.role, notificationPreferences: { taskReminders: user.notificationPreferences?.taskReminders ?? true, dailySummary: user.notificationPreferences?.dailySummary ?? true, focusNotifications: user.notificationPreferences?.focusNotifications ?? true, productivityNotifications: user.notificationPreferences?.productivityNotifications ?? true }, settings: { appearance: user.settings?.appearance ?? "dark", focusMode: user.settings?.focusMode ?? true, defaultView: user.settings?.defaultView ?? "list", language: user.settings?.language ?? "English", backupSync: user.settings?.backupSync ?? false }, createdAt: user.createdAt, updatedAt: user.updatedAt, stats }; }
+
+async function withStats(user: any) { const [counts, focus] = await Promise.all([Task.aggregate([{ $match: { userId: user._id } }, { $group: { _id: "$status", count: { $sum: 1 } } }]), FocusSession.aggregate([{ $match: { userId: user._id, completed: true } }, { $group: { _id: null, minutes: { $sum: "$duration" } } }])]); const values = Object.fromEntries(counts.map((item) => [item._id, Number(item.count)])); return publicProfile(user, { tasks: { total: Object.values(values).reduce((sum: number, value: any) => sum + value, 0), completed: values.completed ?? 0, inProgress: values["in-progress"] ?? 0, pending: values.pending ?? 0 }, totalFocusMinutes: focus[0]?.minutes ?? 0 }); }
+
+userRouter.get("/profile", async (req: AuthRequest, res) => { try { const user = await User.findById(owner(req)); if (!user) return res.status(404).json({ message: "Profile not found" }); return res.json({ profile: await withStats(user) }); } catch (error) { console.error("profile get error", error); return res.status(500).json({ message: "Unable to load profile" }); } });
+
+userRouter.put("/profile", async (req: AuthRequest, res) => { const parsed = profileUpdateSchema.safeParse(req.body); if (!parsed.success) return res.status(400).json({ message: "Please check your profile fields", fields: parsed.error.flatten().fieldErrors }); try { const user = await User.findById(owner(req)); if (!user) return res.status(404).json({ message: "Profile not found" }); if (parsed.data.name !== undefined) user.name = parsed.data.name; if (parsed.data.avatar !== undefined) user.avatar = parsed.data.avatar; if (parsed.data.notificationPreferences) user.notificationPreferences = { ...(user.notificationPreferences?.toObject?.() ?? user.notificationPreferences ?? {}), ...parsed.data.notificationPreferences } as any; if (parsed.data.settings) user.settings = { ...(user.settings?.toObject?.() ?? user.settings ?? {}), ...parsed.data.settings } as any; user.markModified("notificationPreferences"); user.markModified("settings"); await user.save(); return res.json({ profile: await withStats(user) }); } catch (error) { console.error("profile update error", error); return res.status(500).json({ message: "Unable to update profile" }); } });
+
+userRouter.put("/password", async (req: AuthRequest, res) => { const parsed = passwordChangeSchema.safeParse(req.body); if (!parsed.success) return res.status(400).json({ message: "Please check your password fields", fields: parsed.error.flatten().fieldErrors }); try { const user = await User.findById(owner(req)).select("+password"); if (!user || !(await bcrypt.compare(parsed.data.currentPassword, user.password))) return res.status(400).json({ message: "Current password is incorrect" }); user.password = await bcrypt.hash(parsed.data.newPassword, 12); await user.save(); return res.json({ message: "Password changed successfully" }); } catch (error) { console.error("password change error", error); return res.status(500).json({ message: "Unable to change password" }); } });

@@ -12,6 +12,9 @@ export type AuthUser = {
   createdAt?: string;
   updatedAt?: string;
 };
+export type NotificationPreferences = { taskReminders: boolean; dailySummary: boolean; focusNotifications: boolean; productivityNotifications: boolean };
+export type UserSettings = { appearance: "dark" | "light" | "system"; focusMode: boolean; defaultView: "list" | "calendar"; language: string; backupSync: boolean };
+export type UserProfile = AuthUser & { notificationPreferences: NotificationPreferences; settings: UserSettings; stats: { tasks: { total: number; completed: number; inProgress: number; pending: number }; totalFocusMinutes: number } };
 
 type AuthResponse = { token: string; user: AuthUser };
 type ApiMessage = { message: string; resetToken?: string };
@@ -253,6 +256,12 @@ export async function getAnalyticsFocusTime(params: { period?: AnalyticsPeriod; 
 export async function listFocusSessions() { const token = await getStoredToken(); const { data } = await authApi.get<{ items: FocusSession[] }>("/focus/sessions", { headers: { Authorization: `Bearer ${token}` } }); return data.items; }
 
 export async function createFocusSession(payload: { duration: number; completed: boolean; startedAt: string; completedAt?: string | null }) { const token = await getStoredToken(); const { data } = await authApi.post<{ session: FocusSession }>("/focus/sessions", payload, { headers: { Authorization: `Bearer ${token}` } }); return data.session; }
+
+export async function getProfile() { const token = await getStoredToken(); const { data } = await authApi.get<{ profile: UserProfile }>("/users/profile", { headers: { Authorization: `Bearer ${token}` } }); return data.profile; }
+
+export async function updateProfile(payload: { name?: string; avatar?: string; notificationPreferences?: Partial<NotificationPreferences>; settings?: Partial<UserSettings> }) { const token = await getStoredToken(); const { data } = await authApi.put<{ profile: UserProfile }>("/users/profile", payload, { headers: { Authorization: `Bearer ${token}` } }); return data.profile; }
+
+export async function changePassword(payload: { currentPassword: string; newPassword: string; confirmPassword: string }) { const token = await getStoredToken(); const { data } = await authApi.put<ApiMessage>("/users/password", payload, { headers: { Authorization: `Bearer ${token}` } }); return data; }
 
 export async function getMe(token: string) {
   const { data } = await authApi.get<{ user: AuthUser }>("/auth/me", {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { Card, GradientButton, Icon, InputField, SecondaryButton } from "@/components/taskflow";
@@ -43,7 +43,8 @@ export default function TaskFormScreen() {
   if (loading) return <ScreenContainer><View style={styles.loading}><Text style={styles.muted}>Loading task…</Text></View></ScreenContainer>;
 
   return <ScreenContainer containerClassName="bg-background" className="px-5 pt-4">
-    <View style={styles.page}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.page}>
+      <View style={styles.page}>
       <View style={styles.topbar}><Pressable onPress={() => router.back()} hitSlop={10}><Icon name="chevron-back" size={24} color={T.colors.text} /></Pressable><Text style={styles.topTitle}>{editing ? "Edit Task" : "Add Task"}</Text><View style={{ width: 24 }} /></View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <InputField label="Title" placeholder="What needs to get done?" value={task.title} onChangeText={(value) => update("title", value)} />
@@ -59,7 +60,8 @@ export default function TaskFormScreen() {
         <GradientButton label={editing ? "Save Changes" : "Create Task"} icon="checkmark" onPress={save} disabled={saving} />
         <SecondaryButton label="Cancel" onPress={() => router.back()} />
       </ScrollView>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   </ScreenContainer>;
 }
 
