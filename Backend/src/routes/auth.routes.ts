@@ -6,8 +6,10 @@ import { User } from "../models/user.js";
 import { requireAuth, type AuthRequest } from "../middleware/auth.js";
 import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema, verifyResetOtpSchema } from "../validation/auth.schemas.js";
 import { sendPasswordResetOtp } from "../services/mailer.js";
+import { rateLimit } from "../middleware/rate-limit.js";
 
 export const authRouter = Router();
+authRouter.use(rateLimit({ windowMs: 15 * 60_000, max: 40, keyPrefix: "auth" }));
 const RESET_OTP_TTL_MS = 10 * 60 * 1000;
 const VERIFIED_RESET_TTL_MS = 10 * 60 * 1000;
 

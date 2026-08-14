@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { User } from "../src/models/user.js";
 
-const baseUrl = process.env.TASKFLOW_API_URL ?? "http://127.0.0.1:3000/api";
+const baseUrl = process.env.TASKFLOW_API_URL ?? "http://127.0.0.1:4000/api";
 const email = `iteration2-${Date.now()}@example.com`;
 const password = "TaskFlow-Iteration2!";
 

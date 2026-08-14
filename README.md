@@ -146,3 +146,14 @@ Every existing and new `/api/admin/*` endpoint is protected by JWT authenticatio
 The Admin notification history now supports server-side search and filtering through `GET /api/admin/notifications/manage?search=...&status=draft|sent&audience=all|admins|users&page=1&limit=10`. The API returns matching records plus `pagination` metadata with the current page, bounded page size, total result count, and total pages. The Admin interface provides a title/message search field, status and audience filters, total-result counts, and previous/next pagination controls while preserving notification creation, sending, delivery status, and deletion.
 
 The notification list limits each request to a maximum of 50 records to keep the interface responsive on large histories. The smoke test creates temporary records and verifies search matching, combined status/audience filtering, page-size enforcement, and multi-page results before cleaning up the test data.
+
+
+## Iteration 9: Testing, Security, and Production Polish
+
+Iteration 9 verification covers the existing authentication, task CRUD, completion, favorites, search, filters, sorting, calendar, categories, reminders, analytics, focus sessions, profile/settings, Admin, notification-management, and system-settings flows. The smoke suite is located in `Backend/tests/` and includes `auth.smoke.ts`, `tasks.smoke.ts`, `productivity.smoke.ts`, `analytics.smoke.ts`, `profile.smoke.ts`, `admin.smoke.ts`, `admin.iteration8.smoke.ts`, and `security.smoke.ts`.
+
+The Backend now applies an in-memory API request limit of 300 requests per minute per client address and a stricter authentication limit of 40 requests per 15 minutes. Authentication continues to use bcrypt password hashing and JWT verification with database-backed user lookup. The security smoke test explicitly verifies expired JWT rejection, normal-user denial of Admin APIs, validation of Mongo-style operator payloads, rejection of untrusted CORS origins with HTTP 403, and authentication rate limiting.
+
+CORS is controlled by the comma-separated `CORS_ORIGINS` environment variable. If it is not supplied in development, the Backend allows the local Admin Vite origins and local Expo web origins. Production deployments should set `CORS_ORIGINS` to the exact trusted web origins instead of relying on development defaults. No secret values are returned by the `/api/config` endpoint or committed to the repository.
+
+The supplied TaskFlow reference remains the visual source of truth. Focused QA confirmed the existing Mobile splash branding and the separate desktop Admin login retain the dark navy background, purple glow/gradient accents, rounded surfaces, compact typography, and coherent TaskFlow identity. No unnecessary UI redesign was introduced during Iteration 9.
