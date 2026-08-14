@@ -42,6 +42,17 @@ async function main() {
   assert.equal(analytics.status, 200); assert.ok("metrics" in analytics.data); assert.ok("series" in analytics.data);
   const created = await api.post("/admin/notifications/manage", { title: "Iteration 8 test", message: "Delivery verification", audience: "users" }, { headers: adminHeaders });
   assert.equal(created.status, 201); const notificationId = created.data.notification._id;
+  const extraOne = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra one", message: "Pagination verification one", audience: "admins" }, { headers: adminHeaders });
+  const extraTwo = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra two", message: "Pagination verification two", audience: "all" }, { headers: adminHeaders });
+  const extraThree = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra three", message: "Pagination verification three", audience: "users" }, { headers: adminHeaders });
+  const extraFour = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra four", message: "Pagination verification four", audience: "admins" }, { headers: adminHeaders });
+  const extraFive = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra five", message: "Pagination verification five", audience: "all" }, { headers: adminHeaders });
+  const extraSix = await api.post("/admin/notifications/manage", { title: "Iteration 8 extra six", message: "Pagination verification six", audience: "users" }, { headers: adminHeaders });
+  assert.equal(extraOne.status, 201); assert.equal(extraTwo.status, 201); assert.equal(extraThree.status, 201); assert.equal(extraFour.status, 201); assert.equal(extraFive.status, 201); assert.equal(extraSix.status, 201);
+  const filtered = await api.get("/admin/notifications/manage?search=Iteration%208%20test&status=draft&audience=users&limit=1&page=1", { headers: adminHeaders });
+  assert.equal(filtered.status, 200); assert.equal(filtered.data.items.length, 1); assert.equal(filtered.data.pagination.total, 1); assert.equal(filtered.data.pagination.limit, 5);
+  const paged = await api.get("/admin/notifications/manage?search=Iteration%208&limit=1&page=2", { headers: adminHeaders });
+  assert.equal(paged.status, 200); assert.equal(paged.data.pagination.limit, 5); assert.ok(paged.data.pagination.pages >= 2); assert.ok(paged.data.items.length <= 5);
   const sent = await api.post(`/admin/notifications/manage/${notificationId}/send`, {}, { headers: adminHeaders });
   assert.equal(sent.status, 200); assert.equal(sent.data.notification.status, "sent");
   assert.ok(Number(sent.data.notification.delivery.targeted) >= 1);
@@ -53,6 +64,6 @@ async function main() {
   await AdminNotification.deleteMany({ createdBy: admin._id });
   await User.deleteMany({ _id: { $in: [admin._id, user._id] } });
   await mongoose.disconnect();
-  console.log(JSON.stringify({ ok: true, checks: ["JWT required", "normal user denied for every new Admin endpoint", "advanced analytics", "notification create/send/list/delete", "system settings read/update"] }));
+  console.log(JSON.stringify({ ok: true, checks: ["JWT required", "normal user denied for every new Admin endpoint", "advanced analytics", "notification search/filter/pagination", "notification create/send/list/delete", "system settings read/update"] }));
 }
 main().catch(async (error) => { console.error(error.response?.data ?? error); await mongoose.disconnect().catch(() => undefined); process.exitCode = 1; });
