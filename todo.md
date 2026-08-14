@@ -12,3 +12,7 @@
 - [x] Run mobile typecheck/lint/tests and verify preview
 - [x] Run backend and admin checks
 - [x] Document commands and remaining configuration in README.md
+
+- [ ] Create private GitHub repository `TaskFlow-Pro` and push the current TaskFlow foundation
+
+- [ ] Locate the user-created `TaskFlow-Pro` remote and push the current TaskFlow foundation
