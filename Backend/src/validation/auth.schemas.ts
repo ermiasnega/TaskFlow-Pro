@@ -11,6 +11,7 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({ email, password: z.string().min(1, "Password is required") });
 export const forgotPasswordSchema = z.object({ email });
+export const verifyResetOtpSchema = z.object({ email, otp: z.string().regex(/^\d{6}$/, "Enter the six-digit code") });
 export const resetPasswordSchema = z.object({ token: z.string().min(20), password });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

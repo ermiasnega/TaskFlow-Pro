@@ -32,15 +32,15 @@ async function main() {
   if (protectedWithoutToken.status !== 401) throw new Error(`protected route guard failed: ${JSON.stringify(protectedWithoutToken.body)}`);
 
   const forgot = await request("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
-  if (forgot.status !== 200 || !forgot.body.resetToken) throw new Error(`forgot-password failed: ${JSON.stringify(forgot.body)}`);
+  if (forgot.status !== 200 || forgot.body.resetToken) throw new Error(`forgot-password email OTP contract failed: ${JSON.stringify(forgot.body)}`);
 
-  const reset = await request("/auth/reset-password", { method: "POST", body: JSON.stringify({ token: forgot.body.resetToken, password: "TaskFlow-Reset2!" }) });
-  if (reset.status !== 200) throw new Error(`reset-password failed: ${JSON.stringify(reset.body)}`);
+  const resetWithoutVerification = await request("/auth/reset-password", { method: "POST", body: JSON.stringify({ token: "unverified-reset-token", password: "TaskFlow-Reset2!" }) });
+  if (resetWithoutVerification.status !== 400) throw new Error(`reset-password accepted an unverified token: ${JSON.stringify(resetWithoutVerification.body)}`);
 
   await mongoose.connect(process.env.MONGODB_URI as string);
   await User.deleteOne({ email });
   await mongoose.disconnect();
-  console.log(JSON.stringify({ register: registered.status, login: loggedIn.status, invalidLogin: invalid.status, me: me.status, protectedWithoutToken: protectedWithoutToken.status, forgotPassword: forgot.status, resetPassword: reset.status }));
+  console.log(JSON.stringify({ register: registered.status, login: loggedIn.status, invalidLogin: invalid.status, me: me.status, protectedWithoutToken: protectedWithoutToken.status, forgotPassword: forgot.status, resetWithoutVerification: resetWithoutVerification.status }));
 }
 
 main().catch((error) => {

@@ -1,23 +1,38 @@
-import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { AuthHeader, AuthInput, AuthScreen, AuthColors, BackButton, ErrorBanner, PrimaryButton, SecondaryLink } from "@/components/auth-screen";
-import { getApiErrorMessage, resetPassword } from "@/lib/taskflow-auth";
+import { getApiErrorMessage, resetPassword, verifyResetOtp } from "@/lib/taskflow-auth";
 
 export default function ResetPasswordScreen() {
-  const params = useLocalSearchParams<{ token?: string }>();
+  const params = useLocalSearchParams<{ email?: string }>();
+  const email = typeof params.email === "string" ? params.email : "";
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetToken, setResetToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function submit() {
-    if (!params.token) return setError("This reset link is missing its token");
+  async function verifyCode() {
+    if (!email) return setError("This reset request is missing an email address");
+    if (!/^\d{6}$/.test(otp)) return setError("Enter the six-digit code from your email");
+    setLoading(true); setError(null);
+    try {
+      const response = await verifyResetOtp(email, otp);
+      setResetToken(response.resetToken ?? null);
+      setMessage("Code verified. Choose a new password below.");
+    } catch (requestError) { setError(getApiErrorMessage(requestError)); }
+    finally { setLoading(false); }
+  }
+
+  async function submitPassword() {
+    if (!resetToken) return setError("Verify the code before choosing a new password");
     if (password.length < 8) return setError("Password must be at least 8 characters");
     if (password !== confirmPassword) return setError("Passwords do not match");
     setLoading(true); setError(null);
-    try { const response = await resetPassword(params.token, password); setMessage(response.message); }
+    try { const response = await resetPassword(resetToken, password); setMessage(response.message); setResetToken(null); }
     catch (requestError) { setError(getApiErrorMessage(requestError)); }
     finally { setLoading(false); }
   }
@@ -25,20 +40,27 @@ export default function ResetPasswordScreen() {
   return (
     <AuthScreen>
       <BackButton />
-      <AuthHeader title="Choose a new password" subtitle="Create a secure password to protect your TaskFlow account." />
+      <AuthHeader title={resetToken ? "Choose a new password" : "Verify your email"} subtitle={resetToken ? "Create a secure password to protect your TaskFlow account." : `Enter the six-digit code sent to ${email || "your email"}.`} />
       <ErrorBanner message={error} />
-      {message ? <View style={styles.success}><Text style={styles.successText}>{message}</Text><SecondaryLink label="Return to login" onPress={() => router.replace("/(auth)/login")} /></View> : null}
-      {!message ? <>
+      {message ? <View style={styles.success}><Text style={styles.successText}>{message}</Text></View> : null}
+      {!resetToken && !message?.startsWith("Password") ? <>
+        <AuthInput label="Verification code" value={otp} onChangeText={(value) => setOtp(value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" keyboardType="number-pad" maxLength={6} />
+        <PrimaryButton label="Verify Code" onPress={verifyCode} loading={loading} />
+      </> : null}
+      {resetToken ? <>
         <AuthInput label="New password" value={password} onChangeText={setPassword} placeholder="At least 8 characters" secureTextEntry />
         <AuthInput label="Confirm password" value={confirmPassword} onChangeText={setConfirmPassword} placeholder="Repeat your password" secureTextEntry />
-        <PrimaryButton label="Update Password" onPress={submit} loading={loading} />
+        <PrimaryButton label="Update Password" onPress={submitPassword} loading={loading} />
       </> : null}
+      {message === "Password updated successfully" ? <SecondaryLink label="Return to login" onPress={() => router.replace("/(auth)/login")} /> : null}
+      <View style={styles.footer}><Text style={styles.footerText}>Remembered it? </Text><SecondaryLink label="Log in" onPress={() => router.replace("/(auth)/login")} /></View>
     </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  success: { backgroundColor: "#12362D", borderColor: "#2B8A6D", borderWidth: 1, borderRadius: 12, padding: 14, gap: 12 },
+  success: { backgroundColor: "#12362D", borderColor: "#2B8A6D", borderWidth: 1, borderRadius: 12, padding: 14, marginBottom: 16 },
   successText: { color: "#A7F3D0", fontSize: 14, lineHeight: 20 },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 26 },
   footerText: { color: AuthColors.muted, fontSize: 14 },
 });

@@ -49,14 +49,15 @@ export function AuthHeader({ title, subtitle }: { title: string; subtitle: strin
   );
 }
 
-export function AuthInput({ label, value, onChangeText, placeholder, secureTextEntry, keyboardType = "default", autoCapitalize = "none" }: {
+export function AuthInput({ label, value, onChangeText, placeholder, secureTextEntry, keyboardType = "default", autoCapitalize = "none", maxLength }: {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
   placeholder: string;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address";
+  keyboardType?: "default" | "email-address" | "number-pad";
   autoCapitalize?: "none" | "words";
+  maxLength?: number;
 }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -70,6 +71,7 @@ export function AuthInput({ label, value, onChangeText, placeholder, secureTextE
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
+        maxLength={maxLength}
         autoCorrect={false}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

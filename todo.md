@@ -26,3 +26,8 @@
 - [x] Iteration 2: Connect Mobile authentication to the real Backend with secure token persistence and automatic session checks
 - [x] Iteration 2: Test registration, login, invalid credentials, logout, protected routes, and auth loading/error states
 - [ ] Iteration 2: Update documentation and synchronize the three-folder structure to GitHub
+
+- [x] Add production email provider configuration for real reset-password OTP delivery
+- [x] Replace reset-token recovery with hashed, expiring, single-use OTP verification in Backend
+- [x] Update Mobile reset-password UI to request, enter, and verify OTP before changing password
+- [x] Test real-email OTP flow, invalid/expired/reused codes, and document setup

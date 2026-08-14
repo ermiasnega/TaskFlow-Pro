@@ -1,23 +1,23 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
 import { AuthHeader, AuthInput, AuthScreen, AuthColors, BackButton, ErrorBanner, PrimaryButton, SecondaryLink } from "@/components/auth-screen";
 import { forgotPassword, getApiErrorMessage } from "@/lib/taskflow-auth";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [resetToken, setResetToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    if (!email.trim().includes("@")) return setError("Enter a valid email address");
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail.includes("@")) return setError("Enter a valid email address");
     setLoading(true); setError(null); setMessage(null);
     try {
-      const response = await forgotPassword(email.trim().toLowerCase());
+      const response = await forgotPassword(normalizedEmail);
       setMessage(response.message);
-      setResetToken(response.resetToken ?? null);
+      router.push({ pathname: "/(auth)/reset-password", params: { email: normalizedEmail } });
     } catch (requestError) { setError(getApiErrorMessage(requestError)); }
     finally { setLoading(false); }
   }
@@ -25,12 +25,11 @@ export default function ForgotPasswordScreen() {
   return (
     <AuthScreen>
       <BackButton />
-      <AuthHeader title="Reset your password" subtitle="Enter your email and we’ll help you get back into TaskFlow." />
+      <AuthHeader title="Reset your password" subtitle="Enter your email and we’ll send a one-time verification code." />
       <ErrorBanner message={error} />
       {message ? <View style={styles.success}><Text style={styles.successText}>{message}</Text></View> : null}
-      <AuthInput label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" />
-      <PrimaryButton label="Send Reset Link" onPress={submit} loading={loading} />
-      {resetToken ? <SecondaryLink label="Continue to reset password" onPress={() => router.push({ pathname: "/(auth)/reset-password", params: { token: resetToken } })} /> : null}
+      <AuthInput label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" />
+      <PrimaryButton label="Send Verification Code" onPress={submit} loading={loading} />
       <View style={styles.footer}><Text style={styles.footerText}>Remembered it? </Text><SecondaryLink label="Log in" onPress={() => router.push("/(auth)/login")} /></View>
     </AuthScreen>
   );

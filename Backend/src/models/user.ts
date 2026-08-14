@@ -7,8 +7,10 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false },
     avatar: { type: String, default: "" },
     role: { type: String, enum: ["user", "admin"], default: "user", required: true },
-    passwordResetTokenHash: { type: String, select: false },
-    passwordResetExpiresAt: { type: Date, select: false },
+    passwordResetOtpHash: { type: String, select: false },
+    passwordResetOtpExpiresAt: { type: Date, select: false },
+    passwordResetVerificationHash: { type: String, select: false },
+    passwordResetVerificationExpiresAt: { type: Date, select: false },
   },
   { timestamps: true },
 );

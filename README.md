@@ -51,3 +51,23 @@ The Mobile workspace now includes the branded splash/loading state, welcome onbo
 The Backend workspace exposes `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, and protected `GET /api/auth/me`. User passwords are hashed with bcrypt, access tokens use JWT, and user records are stored with Mongoose in MongoDB. In development, forgot-password returns a reset token so the flow can be verified without an email provider; production email delivery remains a later integration.
 
 Configure `MONGODB_URI`, the built-in `JWT_SECRET`, and `EXPO_PUBLIC_API_URL` through the project’s secure environment settings. Do not commit Atlas credentials or `.env` files. Run the Backend directly with `./Backend/node_modules/.bin/tsx Backend/src/server.ts`, run Mobile checks with `./node_modules/.bin/tsc --noEmit -p Mobile/tsconfig.json`, and run the end-to-end auth verification with `./Backend/node_modules/.bin/tsx Backend/tests/auth.smoke.ts`.
+
+## Production password reset with email OTP
+
+Password recovery now uses a real six-digit one-time password delivered by the Backend through the configured SMTP mailbox. The OTP is stored only as a SHA-256 hash, expires after 10 minutes, and is cleared immediately after successful verification. The verification endpoint returns a short-lived, hashed reset credential; the password endpoint accepts only that verified credential, so an email address or unverified token cannot reset a password.
+
+Configure these server-side environment variables in the Backend deployment. Do not commit them to GitHub or expose them in the Mobile bundle.
+
+| Variable | Purpose |
+| --- | --- |
+| `SMTP_HOST` | SMTP provider hostname, such as `smtp.gmail.com` |
+| `SMTP_PORT` | Secure SMTP port, normally `465` or STARTTLS port `587` |
+| `SMTP_USER` | Production sender mailbox username |
+| `SMTP_PASSWORD` | SMTP password or provider App Password |
+| `SMTP_FROM_EMAIL` | Verified From address used by TaskFlow messages |
+
+For the production mailbox `ermiasnega4@gmail.com`, Gmail requires an App Password when two-step verification is enabled. The regular mailbox password should not be used as an application credential.
+
+The Mobile client calls `POST /api/auth/forgot-password` with the email address. The Backend sends the OTP without revealing whether the account exists. The client then calls `POST /api/auth/verify-reset-otp` with the email and six-digit code. After successful verification, it calls `POST /api/auth/reset-password` with the returned reset credential and the new password. Invalid, expired, reused, or unverified values are rejected.
+
+Run `pnpm exec vitest Backend/tests/smtp.secret.test.ts --run` to authenticate the configured SMTP mailbox. Run `pnpm exec tsc --noEmit -p Backend/tsconfig.json` and `pnpm exec tsc --noEmit -p Mobile/tsconfig.json` to check both workspaces. The end-to-end smoke script is `pnpm exec tsx Backend/tests/auth.smoke.ts`; it requires the running Backend and MongoDB environment variables.

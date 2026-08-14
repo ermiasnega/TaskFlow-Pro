@@ -80,6 +80,11 @@ export async function forgotPassword(email: string) {
   return data;
 }
 
+export async function verifyResetOtp(email: string, otp: string) {
+  const { data } = await authApi.post<ApiMessage>("/auth/verify-reset-otp", { email, otp });
+  return data;
+}
+
 export async function resetPassword(token: string, password: string) {
   const { data } = await authApi.post<ApiMessage>("/auth/reset-password", { token, password });
   return data;
