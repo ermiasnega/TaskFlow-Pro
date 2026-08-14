@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { requireAuth, type AuthRequest } from "../middleware/auth.js";
 import { Task } from "../models/task.js";
 import { taskCreateSchema, taskFavoriteSchema, taskListQuerySchema, taskStatusSchema, taskUpdateSchema } from "../validation/task.schemas.js";
+import { calendarQuerySchema } from "../validation/productivity.schemas.js";
 
 export const taskRouter = Router();
 taskRouter.use(requireAuth);
@@ -59,6 +60,16 @@ taskRouter.get("/stats", async (req: AuthRequest, res) => {
     console.error("task stats error", error);
     return res.status(500).json({ message: "Unable to load task statistics" });
   }
+});
+
+taskRouter.get("/calendar", async (req: AuthRequest, res) => {
+  const parsed = calendarQuerySchema.safeParse(req.query); if (!parsed.success) return res.status(400).json({ message: "A valid calendar date is required" });
+  try {
+    const [year, month, day] = parsed.data.date.split("-").map(Number);
+    const start = new Date(year, month - 1, day); const end = new Date(year, month - 1, day + 1);
+    const items = await Task.find({ userId: userId(req), dueDate: { $gte: start, $lt: end } }).sort({ time: 1, createdAt: -1 });
+    return res.json({ date: parsed.data.date, items: items.map(mapTask) });
+  } catch (error) { console.error("calendar tasks error", error); return res.status(500).json({ message: "Unable to load calendar tasks" }); }
 });
 
 taskRouter.get("/", async (req: AuthRequest, res) => {

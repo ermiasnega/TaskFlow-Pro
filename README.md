@@ -92,3 +92,16 @@ The Backend Task model stores the authenticated owner, title, description, statu
 Mobile routes include the Home dashboard, live Tasks list, `/task/[id]` details screen, and `/task/form` add/edit form. The list supports All, In Progress, Pending, Completed, search, favorites-only filtering, sorting, completion checkboxes, and navigation to details. Details support edit, delete, complete/reopen, favorite, and subtask completion. Add and edit forms persist real values to MongoDB.
 
 Verification includes `pnpm exec tsc --noEmit -p Backend/tsconfig.json`, `pnpm exec tsc --noEmit -p Mobile/tsconfig.json`, and `pnpm exec tsx Backend/tests/tasks.smoke.ts`. The smoke test creates a temporary user and task, verifies create/list/detail/update/favorite/complete/stats/delete, and removes its test user afterward.
+
+
+## Iteration 4: Calendar, Categories, Search, and Reminders
+
+TaskFlow now includes MongoDB-backed productivity management features without changing the existing authentication, email OTP, or task CRUD flows. The Calendar tab supports month navigation, selected dates, and date-specific tasks loaded from `GET /api/tasks/calendar?date=YYYY-MM-DD`. Each agenda item shows its saved time, status, and category and can open the existing task detail screen.
+
+Categories are user-owned MongoDB records. The Backend creates the default `Work`, `Personal`, `Study`, `Health`, `Finance`, and `Other` categories on first load, supports create/rename/delete operations, stores a color and icon, and returns live task counts. Category APIs are `GET /api/categories`, `POST /api/categories`, `PUT /api/categories/:id`, and `DELETE /api/categories/:id`.
+
+The Search screen queries tasks, projects, and categories through `GET /api/search?q=...`. Recent searches are stored locally on the device with a clear-history action; search results themselves always come from the authenticated Backend and MongoDB.
+
+Reminders are stored in MongoDB with `userId`, `taskId`, `reminderTime`, `recurrence`, `enabled`, and timestamps. The authenticated API exposes `GET /api/reminders`, `POST /api/reminders`, `PUT /api/reminders/:id`, and `DELETE /api/reminders/:id`. The Mobile Reminders screen supports task selection, one-time/daily/weekly/monthly recurrence, editing, deletion, and enable/disable. When supported, Expo local notifications are scheduled after permission is granted and cancelled when reminders are disabled or deleted. Web preview does not schedule native notifications; use a physical device or development build for notification validation.
+
+Iteration 4 verification uses `./Backend/node_modules/.bin/tsc --noEmit -p Backend/tsconfig.json`, `./node_modules/.bin/tsc --noEmit -p Mobile/tsconfig.json`, `pnpm --dir Admin run check`, and `./Backend/node_modules/.bin/tsx Backend/tests/productivity.smoke.ts`. The smoke test verifies the calendar query, default categories, category CRUD, cross-domain search, and full reminder CRUD using temporary authenticated MongoDB data.

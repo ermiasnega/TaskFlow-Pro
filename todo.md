@@ -48,3 +48,10 @@
 - [x] Consolidate the repository so only Admin, Backend, and Mobile are top-level application folders
 - [x] Remove duplicate lowercase/template application folders and update root scripts and documentation
 - [x] Verify and synchronize the cleaned three-folder repository to GitHub
+
+- [x] Iteration 4: Add MongoDB Category model, defaults, CRUD API, colors/icons, and task counts
+- [x] Iteration 4: Add authenticated calendar date task query and live Calendar screen
+- [x] Iteration 4: Add live Search screen for tasks, projects, and categories with recent-search history
+- [x] Iteration 4: Add MongoDB Reminder model and authenticated reminder CRUD API
+- [x] Iteration 4: Add Reminders screen with task selection, recurrence, enable/disable, edit, delete, and Expo local notification scheduling
+- [x] Iteration 4: Verify APIs, CRUD, Mobile checks, structure, documentation, and GitHub synchronization

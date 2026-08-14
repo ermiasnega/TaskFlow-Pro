@@ -4,6 +4,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { authRouter } from "./routes/auth.routes.js";
 import { taskRouter } from "./routes/task.routes.js";
+import { categoryRouter } from "./routes/category.routes.js";
+import { reminderRouter } from "./routes/reminder.routes.js";
+import { searchRouter } from "./routes/search.routes.js";
 
 export const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -15,6 +18,9 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "taskflo
 app.get("/api/config", (_req, res) => res.json({ name: "TaskFlow", auth: "jwt+bcrypt", database: "mongodb" }));
 app.use("/api/auth", authRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/categories", categoryRouter);
+app.use("/api/reminders", reminderRouter);
+app.use("/api/search", searchRouter);
 
 export async function connectDatabase() {
   if (!mongoUri) throw new Error("MONGODB_URI is not configured");
