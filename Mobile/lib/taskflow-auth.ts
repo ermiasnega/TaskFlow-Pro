@@ -40,6 +40,10 @@ export type Task = {
 
 export type TaskInput = Omit<Partial<Task>, "id" | "createdAt" | "updatedAt" | "completedAt"> & { title: string };
 export type TaskStats = { all: number; completed: number; inProgress: number; pending: number };
+export type Category = { id: string; name: string; color: string; icon: string; taskCount: number };
+export type ReminderRecurrence = "once" | "daily" | "weekly" | "monthly";
+export type Reminder = { id: string; taskId: string; reminderTime: string; recurrence: ReminderRecurrence; enabled: boolean; createdAt: string; task?: { id: string; title: string; status: TaskStatus } };
+export type SearchResults = { tasks: Task[]; projects: string[]; categories: Pick<Category, "id" | "name" | "color" | "icon">[] };
 
 const TOKEN_KEY = "taskflow.jwt";
 const USER_KEY = "taskflow.user";
@@ -167,6 +171,66 @@ export async function updateTaskFavorite(id: string, favorite: boolean) {
   const token = await getStoredToken();
   const { data } = await authApi.patch<{ task: Task }>(`/tasks/${id}/favorite`, { favorite }, { headers: { Authorization: `Bearer ${token}` } });
   return data.task;
+}
+
+export async function getCalendarTasks(date: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ date: string; items: Task[] }>(`/tasks/calendar?date=${encodeURIComponent(date)}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data;
+}
+
+export async function listCategories() {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ items: Category[] }>("/categories", { headers: { Authorization: `Bearer ${token}` } });
+  return data.items;
+}
+
+export async function createCategory(payload: Pick<Category, "name" | "color" | "icon">) {
+  const token = await getStoredToken();
+  const { data } = await authApi.post<{ category: Category }>("/categories", payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.category;
+}
+
+export async function updateCategory(id: string, payload: Partial<Pick<Category, "name" | "color" | "icon">>) {
+  const token = await getStoredToken();
+  const { data } = await authApi.put<{ category: Category }>(`/categories/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.category;
+}
+
+export async function deleteCategory(id: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.delete<ApiMessage>(`/categories/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data;
+}
+
+export async function searchTaskFlow(query: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<SearchResults>(`/search?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data;
+}
+
+export async function listReminders() {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ items: Reminder[] }>("/reminders", { headers: { Authorization: `Bearer ${token}` } });
+  return data.items;
+}
+
+export async function createReminder(payload: { taskId: string; reminderTime: string; recurrence: ReminderRecurrence; enabled: boolean }) {
+  const token = await getStoredToken();
+  const { data } = await authApi.post<{ reminder: Reminder }>("/reminders", payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.reminder;
+}
+
+export async function updateReminder(id: string, payload: Partial<{ taskId: string; reminderTime: string; recurrence: ReminderRecurrence; enabled: boolean }>) {
+  const token = await getStoredToken();
+  const { data } = await authApi.put<{ reminder: Reminder }>(`/reminders/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.reminder;
+}
+
+export async function deleteReminder(id: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.delete<ApiMessage>(`/reminders/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data;
 }
 
 export async function getMe(token: string) {
