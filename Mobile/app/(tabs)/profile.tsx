@@ -6,7 +6,7 @@ import { TaskFlowTheme as T } from "@/constants/theme";
 import { useTaskFlowAuth } from "@/lib/taskflow-auth-context";
 
 const rows = [["color-palette-outline", "Appearance", "Dark"], ["notifications-outline", "Notifications", ""], ["timer-outline", "Focus Mode", ""], ["list-outline", "Default View", "List"], ["language-outline", "Language", "English"], ["cloud-outline", "Backup & Sync", ""], ["shield-checkmark-outline", "Privacy & Security", ""], ["information-circle-outline", "About TaskFlow", "v1.0.0"]] as const;
-const productivityLinks = [["search-outline", "Search", "/search"], ["folder-outline", "Categories", "/categories"], ["notifications-outline", "Reminders", "/reminders"]] as const;
+const productivityLinks = [["search-outline", "Search", "/search"], ["folder-outline", "Categories", "/categories"], ["notifications-outline", "Reminders", "/reminders"], ["timer-outline", "Focus Timer", "/focus"]] as const;
 
 export default function ProfileScreen() {
   const { user, logout, loading } = useTaskFlowAuth();

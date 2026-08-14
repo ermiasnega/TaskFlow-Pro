@@ -44,6 +44,15 @@ export type Category = { id: string; name: string; color: string; icon: string; 
 export type ReminderRecurrence = "once" | "daily" | "weekly" | "monthly";
 export type Reminder = { id: string; taskId: string; reminderTime: string; recurrence: ReminderRecurrence; enabled: boolean; createdAt: string; task?: { id: string; title: string; status: TaskStatus } };
 export type SearchResults = { tasks: Task[]; projects: string[]; categories: Pick<Category, "id" | "name" | "color" | "icon">[] };
+export type AnalyticsPeriod = "week" | "month" | "year" | "custom";
+export type AnalyticsRange = { period: AnalyticsPeriod; start: string; end: string };
+export type AnalyticsOverview = { range: AnalyticsRange; stats: { completed: number; inProgress: number; pending: number; total: number; completionRate: number; tasksCreated: number; totalFocusMinutes: number; productivityChange: number } };
+export type ProductivityPoint = { date: string; tasksCompleted: number; focusMinutes: number };
+export type CategoryAnalytics = { name: string; count: number; completed: number };
+export type FocusTimeAnalytics = { range: AnalyticsRange; totalMinutes: number; sessions: number; daily: { date: string; minutes: number; sessions: number }[] };
+export type FocusSession = { id: string; duration: number; completed: boolean; startedAt: string; completedAt: string | null; createdAt: string; updatedAt: string };
+
+function analyticsQuery(params: { period?: AnalyticsPeriod; start?: string; end?: string } = {}) { const query = new URLSearchParams(); if (params.period) query.set("period", params.period); if (params.start) query.set("start", params.start); if (params.end) query.set("end", params.end); return query.toString() ? `?${query.toString()}` : ""; }
 
 const TOKEN_KEY = "taskflow.jwt";
 const USER_KEY = "taskflow.user";
@@ -232,6 +241,18 @@ export async function deleteReminder(id: string) {
   const { data } = await authApi.delete<ApiMessage>(`/reminders/${id}`, { headers: { Authorization: `Bearer ${token}` } });
   return data;
 }
+
+export async function getAnalyticsOverview(params: { period?: AnalyticsPeriod; start?: string; end?: string } = {}) { const token = await getStoredToken(); const { data } = await authApi.get<AnalyticsOverview>(`/analytics/overview${analyticsQuery(params)}`, { headers: { Authorization: `Bearer ${token}` } }); return data; }
+
+export async function getAnalyticsProductivity(params: { period?: AnalyticsPeriod; start?: string; end?: string } = {}) { const token = await getStoredToken(); const { data } = await authApi.get<{ range: AnalyticsRange; points: ProductivityPoint[] }>(`/analytics/productivity${analyticsQuery(params)}`, { headers: { Authorization: `Bearer ${token}` } }); return data; }
+
+export async function getAnalyticsCategories(params: { period?: AnalyticsPeriod; start?: string; end?: string } = {}) { const token = await getStoredToken(); const { data } = await authApi.get<{ range: AnalyticsRange; categories: CategoryAnalytics[] }>(`/analytics/categories${analyticsQuery(params)}`, { headers: { Authorization: `Bearer ${token}` } }); return data; }
+
+export async function getAnalyticsFocusTime(params: { period?: AnalyticsPeriod; start?: string; end?: string } = {}) { const token = await getStoredToken(); const { data } = await authApi.get<FocusTimeAnalytics>(`/analytics/focus-time${analyticsQuery(params)}`, { headers: { Authorization: `Bearer ${token}` } }); return data; }
+
+export async function listFocusSessions() { const token = await getStoredToken(); const { data } = await authApi.get<{ items: FocusSession[] }>("/focus/sessions", { headers: { Authorization: `Bearer ${token}` } }); return data.items; }
+
+export async function createFocusSession(payload: { duration: number; completed: boolean; startedAt: string; completedAt?: string | null }) { const token = await getStoredToken(); const { data } = await authApi.post<{ session: FocusSession }>("/focus/sessions", payload, { headers: { Authorization: `Bearer ${token}` } }); return data.session; }
 
 export async function getMe(token: string) {
   const { data } = await authApi.get<{ user: AuthUser }>("/auth/me", {
