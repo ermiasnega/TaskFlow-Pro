@@ -16,6 +16,31 @@ export type AuthUser = {
 type AuthResponse = { token: string; user: AuthUser };
 type ApiMessage = { message: string; resetToken?: string };
 
+export type TaskStatus = "pending" | "in-progress" | "completed";
+export type TaskPriority = "low" | "medium" | "high";
+export type TaskSubtask = { _id?: string; title: string; completed: boolean };
+export type Task = {
+  id: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  category: string;
+  project: string;
+  dueDate: string | null;
+  time: string;
+  estimatedTime: string;
+  favorite: boolean;
+  notes: string;
+  subtasks: TaskSubtask[];
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TaskInput = Omit<Partial<Task>, "id" | "createdAt" | "updatedAt" | "completedAt"> & { title: string };
+export type TaskStats = { all: number; completed: number; inProgress: number; pending: number };
+
 const TOKEN_KEY = "taskflow.jwt";
 const USER_KEY = "taskflow.user";
 
@@ -88,6 +113,60 @@ export async function verifyResetOtp(email: string, otp: string) {
 export async function resetPassword(token: string, password: string) {
   const { data } = await authApi.post<ApiMessage>("/auth/reset-password", { token, password });
   return data;
+}
+
+export async function listTasks(params: { status?: "all" | TaskStatus; search?: string; favorite?: boolean; sort?: "dueDate" | "createdAt" | "priority" | "title"; order?: "asc" | "desc" } = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.search) query.set("search", params.search);
+  if (params.favorite !== undefined) query.set("favorite", String(params.favorite));
+  if (params.sort) query.set("sort", params.sort);
+  if (params.order) query.set("order", params.order);
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ items: Task[] }>(`/tasks${query.toString() ? `?${query.toString()}` : ""}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data.items;
+}
+
+export async function getTaskStats() {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ stats: TaskStats; todayTasks: Task[] }>("/tasks/stats", { headers: { Authorization: `Bearer ${token}` } });
+  return data;
+}
+
+export async function getTask(id: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.get<{ task: Task }>(`/tasks/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data.task;
+}
+
+export async function createTask(payload: TaskInput) {
+  const token = await getStoredToken();
+  const { data } = await authApi.post<{ task: Task }>("/tasks", payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.task;
+}
+
+export async function updateTask(id: string, payload: Partial<TaskInput>) {
+  const token = await getStoredToken();
+  const { data } = await authApi.put<{ task: Task }>(`/tasks/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+  return data.task;
+}
+
+export async function deleteTask(id: string) {
+  const token = await getStoredToken();
+  const { data } = await authApi.delete<ApiMessage>(`/tasks/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  return data;
+}
+
+export async function updateTaskStatus(id: string, status: TaskStatus) {
+  const token = await getStoredToken();
+  const { data } = await authApi.patch<{ task: Task }>(`/tasks/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+  return data.task;
+}
+
+export async function updateTaskFavorite(id: string, favorite: boolean) {
+  const token = await getStoredToken();
+  const { data } = await authApi.patch<{ task: Task }>(`/tasks/${id}/favorite`, { favorite }, { headers: { Authorization: `Bearer ${token}` } });
+  return data.task;
 }
 
 export async function getMe(token: string) {

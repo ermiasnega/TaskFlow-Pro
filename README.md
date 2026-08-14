@@ -71,3 +71,24 @@ For the production mailbox `ermiasnega4@gmail.com`, Gmail requires an App Passwo
 The Mobile client calls `POST /api/auth/forgot-password` with the email address. The Backend sends the OTP without revealing whether the account exists. The client then calls `POST /api/auth/verify-reset-otp` with the email and six-digit code. After successful verification, it calls `POST /api/auth/reset-password` with the returned reset credential and the new password. Invalid, expired, reused, or unverified values are rejected.
 
 Run `pnpm exec vitest Backend/tests/smtp.secret.test.ts --run` to authenticate the configured SMTP mailbox. Run `pnpm exec tsc --noEmit -p Backend/tsconfig.json` and `pnpm exec tsc --noEmit -p Mobile/tsconfig.json` to check both workspaces. The end-to-end smoke script is `pnpm exec tsx Backend/tests/auth.smoke.ts`; it requires the running Backend and MongoDB environment variables.
+
+## Iteration 3: Home Dashboard and Core Task Management
+
+The Mobile workspace now contains a live Home dashboard and Tasks experience backed by MongoDB. Dashboard statistics and today’s tasks are loaded from `GET /api/tasks/stats`; the overview never uses the reference image’s example numbers. The Home greeting uses the authenticated user’s stored name, and the existing dark navy, purple, blue, green, and orange TaskFlow design system remains unchanged.
+
+The Backend Task model stores the authenticated owner, title, description, status, priority, category, project, due date, time, estimated time, favorite state, notes, subtasks, timestamps, and `completedAt`. All task routes are ownership-safe and require the JWT bearer token.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/tasks` | List the signed-in user’s tasks with status, search, favorite, sorting, and order query parameters. |
+| `GET` | `/api/tasks/stats` | Return live all/completed/in-progress/pending counts and today’s tasks. |
+| `GET` | `/api/tasks/:id` | Read one owned task. |
+| `POST` | `/api/tasks` | Create a task in MongoDB. |
+| `PUT` | `/api/tasks/:id` | Update task fields and subtasks. |
+| `DELETE` | `/api/tasks/:id` | Delete an owned task. |
+| `PATCH` | `/api/tasks/:id/status` | Complete or reopen a task and maintain `completedAt`. |
+| `PATCH` | `/api/tasks/:id/favorite` | Toggle the favorite state. |
+
+Mobile routes include the Home dashboard, live Tasks list, `/task/[id]` details screen, and `/task/form` add/edit form. The list supports All, In Progress, Pending, Completed, search, favorites-only filtering, sorting, completion checkboxes, and navigation to details. Details support edit, delete, complete/reopen, favorite, and subtask completion. Add and edit forms persist real values to MongoDB.
+
+Verification includes `pnpm exec tsc --noEmit -p Backend/tsconfig.json`, `pnpm exec tsc --noEmit -p Mobile/tsconfig.json`, and `pnpm exec tsx Backend/tests/tasks.smoke.ts`. The smoke test creates a temporary user and task, verifies create/list/detail/update/favorite/complete/stats/delete, and removes its test user afterward.

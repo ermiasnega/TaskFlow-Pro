@@ -35,3 +35,10 @@
 - [x] Add a Resend OTP button with a 60-second countdown to the Mobile OTP verification screen
 
 - [ ] Synchronize the latest TaskFlow source and OTP resend changes to the existing GitHub repository
+
+- [x] Iteration 3: Add MongoDB Task model with ownership, metadata, subtasks, favorites, and completion timestamps
+- [x] Iteration 3: Implement authenticated task CRUD, status, favorite, filtering, sorting, search, and statistics APIs
+- [x] Iteration 3: Replace Home dashboard placeholders with live MongoDB statistics and today’s tasks
+- [x] Iteration 3: Implement live Tasks list with filters, search, sorting, favorite and completion controls
+- [x] Iteration 3: Implement task details and real add/edit/delete/complete/favorite flows
+- [x] Iteration 3: Test task CRUD and update documentation while preserving Admin/Backend/Mobile structure
