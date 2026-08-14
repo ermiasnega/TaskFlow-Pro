@@ -61,7 +61,7 @@ authRouter.post("/login", async (req, res) => {
   if (!parsed.success) return res.status(400).json(validationError(parsed.error.flatten().fieldErrors));
   try {
     const user = await User.findOne({ email: parsed.data.email }).select("+password");
-    if (!user || !(await bcrypt.compare(parsed.data.password, user.password))) return res.status(401).json({ message: "Invalid email or password" });
+    if (!user || user.isDisabled || !(await bcrypt.compare(parsed.data.password, user.password))) return res.status(401).json({ message: "Invalid email or password" });
     return res.json({ token: signToken(String(user._id)), user: publicUser(user) });
   } catch (error) {
     console.error("login error", error);

@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false },
     avatar: { type: String, default: "" },
     role: { type: String, enum: ["user", "admin"], default: "user", required: true },
+    isDisabled: { type: Boolean, default: false, index: true },
     notificationPreferences: {
       taskReminders: { type: Boolean, default: true },
       dailySummary: { type: Boolean, default: true },

@@ -33,6 +33,9 @@ const taskSchema = new mongoose.Schema(
 
 taskSchema.index({ userId: 1, status: 1, dueDate: 1 });
 taskSchema.index({ userId: 1, createdAt: -1 });
+taskSchema.index({ category: 1 });
+taskSchema.index({ createdAt: 1 });
+taskSchema.index({ completedAt: 1 });
 
 export type TaskDocument = InferSchemaType<typeof taskSchema> & mongoose.Document;
 export const Task = mongoose.models.Task || mongoose.model("Task", taskSchema);

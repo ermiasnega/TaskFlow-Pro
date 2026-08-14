@@ -11,4 +11,5 @@ const focusSessionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 focusSessionSchema.index({ userId: 1, startedAt: -1 });
+focusSessionSchema.index({ completed: 1, startedAt: -1 });
 export const FocusSession = mongoose.models.FocusSession || mongoose.model("FocusSession", focusSessionSchema);

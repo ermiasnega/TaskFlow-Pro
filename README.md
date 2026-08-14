@@ -123,3 +123,14 @@ TaskFlow now includes authenticated profile management through `GET /api/users/p
 The Mobile Profile screen displays the real user identity, avatar or initials, MongoDB-backed task counts, completed-task productivity, and total focus minutes. It provides edit-profile, avatar, change-password, settings, and logout actions. The Settings screen persists task reminders, daily summary, focus notifications, productivity notifications, focus mode, default view, and backup/sync controls, with privacy and About TaskFlow information states.
 
 Iteration 6 polish includes safe-area-aware layouts, keyboard avoidance for profile and task forms, scrollable small-screen content, loading and retry states, API error feedback, disabled saving controls, Android-compatible switch and keyboard behavior, and the reference-matched dark bottom navigation. Verification uses strict Backend, Mobile, and Admin checks, the three-folder structure validation, and `./Backend/node_modules/.bin/tsx Backend/tests/profile.smoke.ts`.
+
+
+## Iteration 7: React Admin Dashboard
+
+TaskFlow now includes a separate desktop React/Vite administration workspace under `Admin/`. It is not a copy of the Mobile UI: it uses a fixed sidebar, top search/navigation bar, dense data tables, workspace metric cards, responsive desktop charts, and the shared dark navy, purple, blue, green, and orange TaskFlow design system. The login entry is available at `/admin/login` when the Admin workspace is served with its Vite fallback.
+
+Admin access is protected by the existing JWT authentication plus a Backend `requireAdmin` middleware. Only users whose persisted `role` is `admin` can access `/api/admin/*`; regular users receive HTTP 403. Disabled users are blocked from normal login, while administrators can enable, disable, promote, demote, or delete accounts. Deleting a user cascades their owned tasks, categories, reminders, and focus sessions.
+
+The live Admin workspace provides Dashboard, Users, Tasks, Categories, Analytics, Notifications, and Settings sections. Dashboard metrics and charts aggregate MongoDB users, tasks, categories, and completed focus sessions. Users and Tasks support search, filters, pagination, role/status actions, and destructive-action confirmation. Categories support live list, task counts, create, rename, and delete operations. Notifications and Settings expose real workspace preference distributions.
+
+Iteration 7 verification uses strict Backend and Admin checks, an Admin production build, the exact `Admin/`, `Backend/`, `Mobile/` structure validation, and `./Backend/node_modules/.bin/tsx Backend/tests/admin.smoke.ts`, which covers non-admin denial, dashboard metrics, user search/pagination, cross-user task administration, categories, notifications, settings, and disabled-account login protection.
